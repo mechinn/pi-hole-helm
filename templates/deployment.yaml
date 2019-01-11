@@ -62,9 +62,6 @@ spec:
         - name: http
           containerPort: 80
           protocol: TCP
-        - name: https
-          containerPort: 443
-          protocol: TCP
         - name: dns
           containerPort: 53
           protocol: TCP
