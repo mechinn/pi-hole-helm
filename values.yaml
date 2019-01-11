@@ -1,0 +1,91 @@
+# Default values for pi-hole.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: pihole/pihole
+  tag: 4.1.1
+  pullPolicy: IfNotPresent
+
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  annotations: {}
+  loadBalancerIP: 
+  # loadBalancerSourceRanges: []
+
+ingress:
+  enabled: false
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  paths: []
+  hosts:
+    - chart-example.local
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+persistence:
+  data:
+    # Optionally specify claimName to manually override the PVC to be used for
+    # the pihole data directory. If claimName is specified, storageClass and size are
+    # ignored.
+    ## claimName: "pi-hole-data-pvc"
+    # Optionally specify a storage class to be used for the pihole data directory.
+    # If not specified and claimName is not specified, the default storage
+    # class will be used.
+    storageClass: ""
+    # subPath: some-subpath
+    # The requested size of the volume to be used when creating a
+    # PersistentVolumeClaim.
+    size: 1Gi
+  dnsmasq:
+    # Optionally specify claimName to manually override the PVC to be used for
+    # the dnsmasq.d directory. If claimName is specified, storageClass and size
+    # are ignored.
+    ## claimName: "pi-hole-dnsmasq-pvc"
+    # Optionally specify a storage class to be used for the dnsmasq.d directory.
+    # If not specified and claimName is not specified, the default storage
+    # class will be used.
+    storageClass: ""
+    # subPath: some-subpath
+    # The requested size of the volume to be used when creating a
+    # PersistentVolumeClaim.
+    size: 1Gi
+
+pihole:
+  timezone: UTC
+  # by default is set randomly, look at logs to get password
+  password: 
+  # primary upstream DNS provider
+  dns1: 8.8.8.8
+  # secondary upstream DNS provider
+  dns2: 8.8.4.4
+  # `local` listens on all local subnets, `all` permits listening on internet origin subnets in addition to local.
+  listening: all
+  # expose dhcp functionality
+  dhcp: false

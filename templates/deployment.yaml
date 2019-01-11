@@ -1,0 +1,124 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "pi-hole.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "pi-hole.name" . }}
+    helm.sh/chart: {{ include "pi-hole.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "pi-hole.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "pi-hole.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        {{- if .Values.pihole.dhcp }}
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
+        {{- end }}
+        dnsConfig:
+          nameservers:
+          - 127.0.0.1
+        hostAliases:
+        - ip: "127.0.0.1"
+          hostnames:
+          - "pi.hole"
+        env:
+        - name: ServerIP
+          value: "0.0.0.0"
+        - name: IPv6
+          value: "false"
+        - name: ServerIPv6
+          value: "::"
+        - name: TZ
+          value: {{ .Values.pihole.timezone | quote }}
+        {{- if .Values.pihole.password }}
+        - name: WEBPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "pi-hole.fullname" . }}
+              key: password
+        {{- end }}
+        - name: DNS1
+          value: {{ .Values.pihole.dns1 | quote }}
+        - name: DNS2
+          value: {{ .Values.pihole.dns2 | quote }}
+        - name: DNSMASQ_LISTENING
+          value: {{ .Values.pihole.listening | quote }}
+        ports:
+        - name: http
+          containerPort: 80
+          protocol: TCP
+        - name: https
+          containerPort: 443
+          protocol: TCP
+        - name: dns
+          containerPort: 53
+          protocol: TCP
+        - name: dns-udp
+          containerPort: 53
+          protocol: UDP
+        - name: bootp
+          containerPort: 67
+          protocol: UDP
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http
+        volumeMounts:
+        - name: data
+          mountPath: /etc/pihole
+        {{- if .Values.persistence.data.subPath }}
+          subPath: {{ .Values.persistence.data.subPath }}
+        {{ end }}
+        - name: dnsmasq
+          mountPath: /etc/dnsmasq.d
+        {{- if .Values.persistence.dnsmasq.subPath }}
+          subPath: {{ .Values.persistence.dnsmasq.subPath }}
+        {{ end }}
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+{{- if .Values.persistence.data.claimName }}
+          claimName: {{ .Values.persistence.data.claimName | quote }}
+{{- else }}
+          claimName: "{{ include "pi-hole.fullname" . }}-data"
+{{- end }}
+      - name: dnsmasq
+        persistentVolumeClaim:
+{{- if .Values.persistence.dnsmasq.claimName }}
+          claimName: {{ .Values.persistence.dnsmasq.claimName | quote }}
+{{- else }}
+          claimName: "{{ include "pi-hole.fullname" . }}-dnsmasq"
+{{- end }}

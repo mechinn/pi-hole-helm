@@ -1,0 +1,42 @@
+{{- if not .Values.persistence.dnsmasq.claimName }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "pi-hole.fullname" . }}-dnsmasq
+  labels:
+    app.kubernetes.io/name: {{ include "pi-hole.name" . }}
+    helm.sh/chart: {{ include "pi-hole.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: {{ .Values.persistence.dnsmasq.size | quote }}
+{{- if .Values.persistence.dnsmasq.storageClass }}
+  storageClassName: {{ .Values.persistence.dnsmasq.storageClass | quote }}
+{{- end }}
+---
+{{- end }}
+{{- if not .Values.persistence.data.claimName }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "pi-hole.fullname" . }}-data
+  labels:
+    app.kubernetes.io/name: {{ include "pi-hole.name" . }}
+    helm.sh/chart: {{ include "pi-hole.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: {{ .Values.persistence.data.size | quote }}
+{{- if .Values.persistence.data.storageClass }}
+  storageClassName: {{ .Values.persistence.data.storageClass | quote }}
+{{- end }}
+---
+{{- end }}

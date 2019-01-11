@@ -1,0 +1,37 @@
+{{- if eq .Values.service.type "LoadBalancer" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "pi-hole.fullname" . }}-udp
+  labels:
+    app.kubernetes.io/name: {{ include "pi-hole.name" . }}
+    helm.sh/chart: {{ include "pi-hole.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  annotations:
+    metallb.universe.tf/allow-shared-ip: {{ include "pi-hole.fullname" . }}
+  {{- with .Values.service.annotations }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: "LoadBalancer"
+  {{- if .Values.service.loadBalancerIP }}
+  loadBalancerIP: {{ .Values.service.loadBalancerIP }}
+  {{- end }}
+  {{- if .Values.service.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+{{ toYaml .Values.service.loadBalancerSourceRanges | indent 4 }}
+  {{- end }}
+  ports:
+    - name: dns-udp
+      port: 53
+      protocol: UDP
+    {{- if .Values.pihole.dhcp }}
+    - name: bootp
+      port: 67
+      protocol: UDP
+    {{- end }}
+  selector:
+    app.kubernetes.io/name: {{ include "pi-hole.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
