@@ -19,6 +19,13 @@ spec:
         app.kubernetes.io/name: {{ include "pi-hole.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
+      dnsConfig:
+        nameservers:
+        - 127.0.0.1
+      hostAliases:
+      - ip: "127.0.0.1"
+        hostnames:
+        - "pi.hole"
       containers:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -29,13 +36,6 @@ spec:
             add:
             - NET_ADMIN
         {{- end }}
-        dnsConfig:
-          nameservers:
-          - 127.0.0.1
-        hostAliases:
-        - ip: "127.0.0.1"
-          hostnames:
-          - "pi.hole"
         env:
         - name: ServerIP
           value: "0.0.0.0"
