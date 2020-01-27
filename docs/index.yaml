@@ -1,0 +1,15 @@
+apiVersion: v1
+entries:
+  pi-hole:
+  - apiVersion: v1
+    appVersion: 4.1.1
+    created: "2020-01-27T11:20:16.895785-05:00"
+    description: Pi-hole® is a DNS sinkhole that protects your devices from unwanted
+      content, without installing any client-side software.
+    digest: 87297d0d6597f34d9f5af7a219a7f7973f6b18594fb37c0d044bab71eb727698
+    icon: https://piholenet.b-cdn.net/wp-content/uploads/2018/12/pihole-text-logo-white.png
+    name: pi-hole
+    urls:
+    - https://github.com/mechinn/pi-hole-helm/releases/download/pi-hole-1.0.0/pi-hole-1.0.0.tgz
+    version: 1.0.0
+generated: "2020-01-27T11:20:16.778952-05:00"
